@@ -58,7 +58,7 @@ asura-store catalog --refresh                  # bypass any fresh in-process cac
 asura-store search "video editor"              # apt/xbps hits, JSON
 asura-store check                              # {"revision","updateAvailable","offline"}
 asura-store install apps vlc                   # {"stage","percent"} progress lines
-asura-store remove plugins pomodoro
+asura-store remove apps vlc
 asura-store open discover                      # the OS-session subcommands
 asura-store settings themes                    # (need the ASURA shell installed)
 ```

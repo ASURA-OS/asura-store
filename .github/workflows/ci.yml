@@ -150,6 +150,7 @@ jobs:
       - name: The catalogue JSON is well-formed and matches the provider grammar
         run: |
           set -euo pipefail
+          shopt -s nullglob
 
           # The Go loaders skip entries that fail to parse or to match, so a
           # rotting manifest would just vanish from the shelf. The data itself

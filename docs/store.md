@@ -47,7 +47,8 @@ unchanged, every page in the same shape.
 `catalog` has four categories. `apps` is a shelf of about thirty seed packages
 with summary, description, version and home page read from apt (`xbps-query` on
 a Void host), and the installed read from dpkg (`xbps-query -l`). `barstyles`
-lists the shell's built-in bar styles and the one `shell.json` selects. `plugins`
+lists the shell's three built-in bar styles — `qsbar`, `kairos`, `sumi` — and
+the one `shell.json` selects. `plugins`
 reads the local catalogue under `catalog/plugins/`: each entry carries an
 `upstream` repo, and installed means a folder in `~/.local/share/asura/plugins`.
 `themes` merges the built-ins with the `catalog/themes/` entries and any theme
@@ -104,10 +105,9 @@ refuses, and its error names the command that would work.
 `themes` is applied, not downloaded. Installing a theme writes its name into
 `~/.config/asura/current/theme.name` (`XDG_CONFIG_HOME` honoured; the older
 bare `~/.config/asura/theme.name` is still read), which the shell's theme
-engine picks up live. Only a theme whose files are on disk, or one of the
-shipped themes, can be activated — a catalogue-only entry stays listed as
-available. A removal refuses the built-in theme and the active theme, then
-deletes the theme's directories.
+engine picks up live. Only a theme whose files are on disk can be activated —
+a catalogue-only entry stays listed as available. A removal refuses the
+active theme, then deletes the theme's directories.
 
 `barstyles` is all shelf: the styles are built into the shell, so install and
 remove refuse.
@@ -206,9 +206,15 @@ Optional gates on any entry: `requiredWindowManager` (the gate above),
 CONSTRUCTION). Items honor the wider `Item` contract — tags, accent, surface,
 kind, licence, screenshots — when a downstream page wants them.
 
-`barstyles` manifests are on record for completeness and CI keeps them valid;
-the backend itself lists the shell's built-in styles, so a bar style entry is
+`barstyles` manifests are on record only: the backend itself lists the shell's
+three built-in styles (`qsbar`, `kairos`, `sumi`), so a bar style entry is
 metadata, not shelf content.
+
+The catalogue ships empty of fiction today: `plugins/` and `themes/` carry no
+entries at all, because a shelf entry is a promise — a plugin promises a real
+upstream repo, a theme promises files that exist — and an entry that cannot
+honor its promise is worse than no entry. Drop real ones in; the shelves pick
+them up on the next build.
 
 ## What is not here, and why
 
