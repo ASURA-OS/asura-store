@@ -21,15 +21,18 @@ concurrency:
 
 jobs:
   backend:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Go at the version go.mod pins
-        uses: actions/setup-go@v5
+        # The module is standard library only; there is no go.sum to hash, so
+        # the restore cache is off rather than failing to find one.
+        uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
+          cache: false
 
       - name: Object to the toolchain
         run: go version
@@ -99,13 +102,13 @@ jobs:
           expect_fail $BIN catalog --bogus-flag
 
   window:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: '22'
 
@@ -113,10 +116,10 @@ jobs:
         run: node --test ui/lib/store.test.mjs
 
   qml:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install the Qt QML tooling
         run: |
@@ -130,10 +133,10 @@ jobs:
           /usr/lib/qt6/bin/qmllint $plan
 
   catalog:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: The catalogue JSON is well-formed and matches the provider grammar
         run: |
