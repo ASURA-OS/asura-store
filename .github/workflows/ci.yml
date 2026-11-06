@@ -1,39 +1,168 @@
-name: CI
+# Store CI.
+#
+# The store has three kinds of failure, so the gate splits along the same
+# lines as the tree: the Go backend (format, vet, race tests, a real build
+# and a CLI smoke against the built binary), the window's JavaScript
+# helpers, the QML the window is written in, and the catalogue JSON itself.
+# Everything is self-contained: the only checkout is this repository.
+
+name: ci
 
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test:
+  backend:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Set up Go
+      - name: Set up Go at the version go.mod pins
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version-file: go.mod
+
+      - name: Object to the toolchain
+        run: go version
+
+      - name: gofmt leaves no drift
+        run: |
+          drift="$(gofmt -l cmd)"
+          if [ -n "$drift" ]; then
+            echo "gofmt would change:"
+            echo "$drift"
+            exit 1
+          fi
+
+      - name: go vet is silent
+        run: go vet ./...
+
+      - name: go test under the race detector, no cache
+        run: go test -count=1 -race -v ./...
+
+      - name: build the CLI the way the release does
+        run: go build -trimpath -o /tmp/asura-store ./cmd/asura-store
+
+      - name: make install lands the binary, the window and the catalogue
+        run: |
+          make install DESTDIR=/tmp/stageroot
+          test -x /tmp/stageroot/usr/bin/asura-store
+          test -f /tmp/stageroot/usr/share/asura/store/ui/store.qml
+          test -d /tmp/stageroot/usr/share/asura/store/catalog/plugins
+
+      - name: CLI smoke against the built binary
+        run: |
+          set -euo pipefail
+          BIN=/tmp/asura-store
+
+          expect_fail() {
+            if "$@" >/dev/null 2>&1; then
+              echo "expected a failure and got none: $*"
+              exit 1
+            fi
+          }
+
+          # `check` answers the refresh-dot contract: a revision, no update,
+          # and an online runner.
+          $BIN check | jq -e '.revision | length == 64'
+          $BIN check | jq -e '.updateAvailable == false'
+          $BIN check | jq -e '.offline == false'
+
+          # the catalogue carries the four categories, a revision and items
+          $BIN catalog > /tmp/catalog.json
+          jq -e '[.categories[].id] | sort == ["apps","barstyles","plugins","themes"]' /tmp/catalog.json
+          jq -e '.revision | length == 64' /tmp/catalog.json
+          jq -e '.items | length > 0' /tmp/catalog.json
+
+          # a category query resolves to that provider alone
+          $BIN catalog --category themes | jq -e '[.categories[].id] == ["themes"]'
+
+          # search works against the runner's own apt archive
+          $BIN search curl | jq -e '.items | length > 0'
+
+          # every bad invocation fails with one sentence on stderr
+          expect_fail $BIN
+          expect_fail $BIN bogus-command
+          expect_fail $BIN search
+          expect_fail $BIN install
+          expect_fail $BIN install no-such-category x
+          expect_fail $BIN catalog --category no-such-category
+          expect_fail $BIN catalog --bogus-flag
+
+  window:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
-      - name: Build Go backend
-        run: |
-          cd cmd/asura-store
-          go build -v ./...
+      - name: The window's JavaScript helpers pass their tests
+        run: node --test ui/lib/store.test.mjs
 
-      - name: Run Go Unit Tests
-        run: |
-          cd cmd/asura-store
-          go test -v ./...
+  qml:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
 
-      - name: Run Node UI Tests
+      - name: Install the Qt QML tooling
         run: |
-          cd ui/lib
-          node --test store.test.mjs
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends qt6-declarative-dev-tools
+
+      - name: qmllint every window file (the Quickshell imports warn; errors fail)
+        run: |
+          plan="$(find ui -name '*.qml')"
+          echo "$plan"
+          /usr/lib/qt6/bin/qmllint $plan
+
+  catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: The catalogue JSON is well-formed and matches the provider grammar
+        run: |
+          set -euo pipefail
+
+          # The Go loaders skip entries that fail to parse or to match, so a
+          # rotting manifest would just vanish from the shelf. The data itself
+          # is checked here, where a bad entry is loud.
+          for f in catalog/*/*.json; do
+            jq -e '
+              (has("id") and has("category") and has("name") and has("summary"))
+              and (.id       | type == "string" and length > 0)
+              and (.category | type == "string" and length > 0)
+            ' "$f" >/dev/null || { echo "broken entry: $f"; exit 1; }
+          done
+
+          # the id grammar the providers enforce at runtime, so an entry can
+          # never escape its directory or read as an option
+          for f in catalog/plugins/*.json; do
+            id="$(jq -r '.id' "$f")"
+            echo "$id" | grep -Eq '^[a-z0-9][a-z0-9-]*$' || { echo "bad plugin id: $id ($f)"; exit 1; }
+          done
+          for f in catalog/themes/*.json catalog/barstyles/*.json; do
+            id="$(jq -r '.id' "$f")"
+            echo "$id" | grep -Eq '^[a-z0-9][a-z0-9._-]*$' || { echo "bad id: $id ($f)"; exit 1; }
+          done
+
+          # an entry agrees with the folder it lives in
+          for f in catalog/*/*.json; do
+            kind="$(basename "$(dirname "$f")")"
+            [ "$(jq -r '.category' "$f")" = "$kind" ] || { echo "category mismatch: $f"; exit 1; }
+          done
