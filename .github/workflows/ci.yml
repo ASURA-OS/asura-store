@@ -67,6 +67,27 @@ jobs:
           set -euo pipefail
           BIN=/tmp/asura-store
 
+          mkdir -p /tmp/bin
+          cat << 'EOF' > /tmp/bin/xbps-query
+#!/bin/sh
+case "$*" in
+  "-l")
+    echo "ii git-2.48.1_1 Fast version control"
+    echo "ii vlc-3.0.21_1 VLC media player"
+    ;;
+  *"-S"*)
+    pkg="${@: -1}"
+    echo "pkgver: ${pkg}-1.0.0_1"
+    echo "short_desc: Application package for ${pkg}"
+    ;;
+  *"-Rs"*)
+    echo "[-] curl-8.10.1_1 Command line tool for transferring data"
+    ;;
+esac
+EOF
+          chmod +x /tmp/bin/xbps-query
+          export PATH="/tmp/bin:$PATH"
+
           expect_fail() {
             if "$@" >/dev/null 2>&1; then
               echo "expected a failure and got none: $*"
@@ -89,7 +110,7 @@ jobs:
           # a category query resolves to that provider alone
           $BIN catalog --category themes | jq -e '[.categories[].id] == ["themes"]'
 
-          # search works against the runner's own apt archive
+          # search works against the native package query
           $BIN search curl | jq -e '.items | length > 0'
 
           # every bad invocation fails with one sentence on stderr
