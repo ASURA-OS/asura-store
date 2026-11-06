@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   backend:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
@@ -102,7 +102,7 @@ jobs:
           expect_fail $BIN catalog --bogus-flag
 
   window:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
@@ -116,7 +116,7 @@ jobs:
         run: node --test ui/lib/store.test.mjs
 
   qml:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
@@ -127,6 +127,10 @@ jobs:
         # modules (QtQuick, QtQuick.Effects) come as qml6-module-* packages.
         # A tools-only environment fails to resolve Rectangle and friends,
         # floods real findings with false ones, and stops with exit 255.
+        # This is the Qt 6.10-era packaging of the 26.04 archive: on the noble
+        # image apt exits 100 on qml6-module-qtquick-effects, which is one
+        # reason every job pins ubuntu-26.04 — the runner must carry the same
+        # Qt the lint expectations were rehearsed against.
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends qt6-declarative-dev-tools qt6-declarative-dev qml6-module-qtquick qml6-module-qtquick-effects
@@ -138,7 +142,7 @@ jobs:
           /usr/lib/qt6/bin/qmllint $plan
 
   catalog:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
