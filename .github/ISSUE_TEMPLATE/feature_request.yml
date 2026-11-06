@@ -1,0 +1,41 @@
+name: Feature or catalogue entry
+description: Propose a shelf, a behaviour or a catalogue addition for the store
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before proposing a new provider or a remote service, read
+        [docs/store.md](../../blob/main/docs/store.md)'s "What is not here,
+        and why": no remote registry, no Flatpak, no snapshot cache — each
+        excision was a decision, not an omission.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of proposal?
+      options:
+        - A catalogue entry (plugin / theme / bar style)
+        - Window UX
+        - CLI behaviour
+        - A new provider or shelf
+        - Docs
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: The proposal
+      description: What it should do, concretely. For a catalogue entry, paste the JSON and the upstream repo.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: The problem it solves, or the itch it scratches.
+  - type: textarea
+    id: fit
+    attributes:
+      label: How it fits the contract
+      description: For backend changes, how it stays inside the JSON contract (fields may be added, never renamed) and the no-sudo rule.

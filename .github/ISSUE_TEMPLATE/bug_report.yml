@@ -1,0 +1,67 @@
+name: Bug report
+description: Something in the store window or the asura-store command misbehaves
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for testing Asura Store. What helps a fix most is the exact
+        JSON/stderr contract output, not a paraphrase of it.
+
+        Security reports (anything that could hold a privilege, escape an id,
+        or kick off a download) must not go through this form — see
+        [SECURITY.md](../../blob/main/SECURITY.md).
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, what happened instead. Steps to reproduce first.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where did it break?
+      options:
+        - The window (Quickshell UI)
+        - catalog / check
+        - search
+        - install or remove — apps (apt)
+        - install or remove — apps (xbps)
+        - install or remove — plugins
+        - install or remove — themes
+        - open / settings
+        - Build, packaging or CI
+        - Something else
+    validations:
+      required: true
+  - type: dropdown
+    id: host
+    attributes:
+      label: Which host?
+      options:
+        - ASURA OS
+        - Ubuntu family (apt)
+        - Void Linux (xbps)
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command and full output
+      description: |
+        The exact command and everything it printed. For an install problem,
+        include every `{"stage","percent"}` line and the final stderr sentence.
+      render: text
+  - type: textarea
+    id: catalogue
+    attributes:
+      label: The catalogue answer, if useful
+      description: "`asura-store catalog --refresh 2>err.txt | head -100` — trim anything you consider private."
+      render: text
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: Distro and version, window manager, quickshell version, go version if you built the binary.
