@@ -28,11 +28,12 @@ rules here are short, and most of them are what the CI gate
   directory and its `qs.Ui` kit (see `docs/store.md`). It is not a runnable
   config from this repository alone.
 - **`jq`** — most CI scripts answer through it.
-- **For `qmllint`** — the tool and the two modules the window imports:
+- **For `qmllint`** — Qt's declarative tools.
+
+  On ASURA OS (or any Void Linux system), everything above is one command:
 
   ```bash
-  sudo apt-get install qt6-declarative-dev-tools qt6-declarative-dev \
-    qml6-module-qtquick qml6-module-qtquick-effects
+  sudo xbps-install -S go gcc make jq nodejs qt6-declarative-devel qt6-declarative-tools
   ```
 
 ## Everyday checks

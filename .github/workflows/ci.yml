@@ -5,6 +5,10 @@
 # and a CLI smoke against the built binary), the window's JavaScript
 # helpers, the QML the window is written in, and the catalogue JSON itself.
 # Everything is self-contained: the only checkout is this repository.
+#
+# Every job runs inside Void Linux (glibc), ASURA OS's base layer, with its
+# tools from Void's repositories, so the checks run against the same Go,
+# Qt and Node.js the OS ships rather than a generic Ubuntu runner's.
 
 name: ci
 
@@ -15,24 +19,31 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   backend:
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-24.04
+    container: ghcr.io/void-linux/void-glibc-full:latest
     steps:
+      - name: Install the toolchain from Void's repositories
+        shell: sh
+        run: |
+          xbps-install -Syu xbps
+          xbps-install -Syu
+          xbps-install -y bash go gcc make jq git
+
       - name: Check out repository
         uses: actions/checkout@v5
-
-      - name: Set up Go at the version go.mod pins
-        # The module is standard library only; there is no go.sum to hash, so
-        # the restore cache is off rather than failing to find one.
-        uses: actions/setup-go@v6
-        with:
-          go-version-file: go.mod
-          cache: false
 
       - name: Object to the toolchain
         run: go version
@@ -50,7 +61,7 @@ jobs:
         run: go vet ./...
 
       - name: go test under the race detector, no cache
-        run: go test -count=1 -race -v ./...
+        run: CGO_ENABLED=1 go test -count=1 -race -v ./...
 
       - name: build the CLI the way the release does
         run: go build -trimpath -o /tmp/asura-store ./cmd/asura-store
@@ -76,7 +87,8 @@ jobs:
               echo "ii vlc-3.0.21_1 VLC media player"
               ;;
             *"-S"*)
-              pkg="${@: -1}"
+              # The package is the last argument (POSIX sh has no ${@: -1}).
+              for pkg; do :; done
               echo "pkgver: ${pkg}-1.0.0_1"
               echo "short_desc: Application package for ${pkg}"
               ;;
@@ -123,48 +135,56 @@ jobs:
           expect_fail $BIN catalog --bogus-flag
 
   window:
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-24.04
+    container: ghcr.io/void-linux/void-glibc-full:latest
     steps:
+      - name: Install Node.js from Void's repositories
+        shell: sh
+        run: |
+          xbps-install -Syu xbps
+          xbps-install -Syu
+          xbps-install -y bash nodejs git
+
       - name: Check out repository
         uses: actions/checkout@v5
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: '22'
 
       - name: The window's JavaScript helpers pass their tests
         run: node --test ui/lib/store.test.mjs
 
   qml:
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-24.04
+    container: ghcr.io/void-linux/void-glibc-full:latest
     steps:
+      - name: Install Qt's QML tooling from Void's repositories
+        # qmllint needs more than its binary to analyse a window: the builtins
+        # (jsroot.qmltypes) and the imported modules (QtQuick, QtQuick.Effects)
+        # come with qt6-declarative and its -devel package. This is the Qt the
+        # OS itself ships, so the lint sees exactly what the window runs on.
+        shell: sh
+        run: |
+          xbps-install -Syu xbps
+          xbps-install -Syu
+          xbps-install -y bash findutils git qt6-declarative-devel qt6-declarative-tools
+
       - name: Check out repository
         uses: actions/checkout@v5
 
-      - name: Install the Qt QML tooling
-        # qmllint needs more than its binary to analyse a window: the builtins
-        # (jsroot.qmltypes) come with qt6-declarative-dev, and the imported
-        # modules (QtQuick, QtQuick.Effects) come as qml6-module-* packages.
-        # A tools-only environment fails to resolve Rectangle and friends,
-        # floods real findings with false ones, and stops with exit 255.
-        # This is the Qt 6.10-era packaging of the 26.04 archive: on the noble
-        # image apt exits 100 on qml6-module-qtquick-effects, which is one
-        # reason every job pins ubuntu-26.04 — the runner must carry the same
-        # Qt the lint expectations were rehearsed against.
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends qt6-declarative-dev-tools qt6-declarative-dev qml6-module-qtquick qml6-module-qtquick-effects
-
       - name: qmllint every window file (the Quickshell imports warn; errors fail)
         run: |
-          plan="$(find ui -name '*.qml')"
-          echo "$plan"
-          /usr/lib/qt6/bin/qmllint $plan
+          find ui -name '*.qml' -print
+          find ui -name '*.qml' -exec /usr/lib/qt6/bin/qmllint {} +
 
   catalog:
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-24.04
+    container: ghcr.io/void-linux/void-glibc-full:latest
     steps:
+      - name: Install jq from Void's repositories
+        shell: sh
+        run: |
+          xbps-install -Syu xbps
+          xbps-install -Syu
+          xbps-install -y bash jq git
+
       - name: Check out repository
         uses: actions/checkout@v5
 
