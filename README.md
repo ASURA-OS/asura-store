@@ -17,7 +17,7 @@ and what did not.
 
 | Shelf | What it offers | Where it comes from |
 |---|---|---|
-| **Apps** | vlc, gimp, blender, keepassxc, steam and the rest of the Discover seeds | the Ubuntu archive via apt (`dpkg-query`, `apt-cache`), or Void Linux's repositories via `xbps-query` |
+| **Apps** | vlc, gimp, blender, keepassxc, steam and the rest of the Discover seeds | Void Linux's repositories via XBPS (`xbps-query`, `xbps-install`, `xbps-remove`) |
 | **Bar styles** | the shell's built-in bar compositions | built into the shell — list only, install and remove refuse |
 | **Plugins** | widgets, overlays, integrations | `catalog/plugins/*.json`; install runs `asura plugin install <upstream>` from the entry's upstream repo |
 | **Themes & rices** | palettes and appearance sets | `catalog/themes/*.json`, the shipped themes, and theme directories on disk — activation, not download |
@@ -32,10 +32,9 @@ whole shelf.
 ```mermaid
 flowchart TD
     W[Quickshell window<br>ui/store.qml] -->|JSON lines| C[asura-store data plane<br>cmd/asura-store]
-    C -->|dpkg-query, apt-cache| APT[Apps — apt]
     C -->|xbps-query| XBPS[Apps — xbps]
     C -->|catalog/*.json| PJ[Plugins, themes, bar styles]
-    C -->|pkexec helpers / pkexec xbps| PKG[polkit install path]
+    C -->|pkexec xbps-install / xbps-remove| PKG[polkit install path]
     C -->|asura plugin install| PLG[plugin kit]
 ```
 
@@ -55,7 +54,7 @@ flowchart TD
 asura-store catalog                  # the whole shelf as JSON
 asura-store catalog --category themes          # one category, alone
 asura-store catalog --refresh                  # bypass any fresh in-process cache
-asura-store search "video editor"              # apt/xbps hits, JSON
+asura-store search "video editor"              # xbps hits, JSON
 asura-store check                              # {"revision","updateAvailable","offline"}
 asura-store install apps vlc                   # {"stage","percent"} progress lines
 asura-store remove apps vlc
@@ -66,9 +65,9 @@ asura-store settings themes                    # (need the ASURA shell installed
 Every reading command answers JSON and writes nothing else to stdout. Every failing
 invocation answers one sentence on stderr and exits 1. While an install or a removal
 works, one `{"stage","percent"}` JSON line per step goes to stdout — `AUTHORIZING`,
-`DOWNLOADING`, `INSTALLING` (or `REMOVING`) — and a failure is still a single sentence
-on stderr, which the window shows. Cancel is honoured until dpkg starts; after that the
-transaction runs to its end rather than leave a half-configured system.
+then `INSTALLING` (or `REMOVING`) — and a failure is still a single sentence on stderr,
+which the window shows. Once xbps is running as root the store cannot stop it, so a
+transaction that has started runs to its end rather than leave a half-configured system.
 
 `check` answers the refresh-dot contract: a revision (a SHA-256 over what the catalogue
 offers, ignoring volatile state), `updateAvailable` only when the revision has moved

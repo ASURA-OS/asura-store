@@ -23,8 +23,9 @@ from.
 - Renames: `ryostore` → `asura-store`, Ryoku's `Ryo*` names → ASURA's, and the
   window's branding says "Asura". Library names inside the tree are the ones the
   imports resolve through.
-- What is ASURA's own: the Ubuntu apt provider with its `asura-pkg-add` /
-  `asura-pkg-remove` helper seam and cancel semantics, the xbps provider, the plugin
+- What is ASURA's own: the xbps provider (an Ubuntu apt provider with an
+  `asura-pkg-add` / `asura-pkg-remove` helper seam was removed when ASURA moved to a
+  Void Linux base), the plugin
   provider's `asura plugin install` hand-off, the theme provider's activate-by-file
   model, the bar-style shelf and its `shell.json` selection, the two shell subcommands
   (`open`, `settings`) that speak to the ASURA session, the catalogue manifests in

@@ -66,9 +66,8 @@ refusals, which must each be one sentence on stderr and exit 1.
   keep its comments honest.
 - **Paths honour the environment** — `XDG_CONFIG_HOME`, `XDG_DATA_HOME`,
   `XDG_CACHE_HOME` — and nothing user-facing lives outside them.
-- **The store never holds a privilege.** Escalation is polkit, through the
-  OS's `asura-pkg-add`/`asura-pkg-remove` helpers or `pkexec xbps-*`. No
-  `sudo` anywhere, ever.
+- **The store never holds a privilege.** Escalation is polkit, through
+  `pkexec xbps-install` / `pkexec xbps-remove`. No `sudo` anywhere, ever.
 - **Catalogue entries** follow `docs/store.md` ("Authoring catalogue
   entries"): the loaders silently skip a file that does not parse or whose id
   misses the grammar, so the data must stay clean — CI validates it loudly so
