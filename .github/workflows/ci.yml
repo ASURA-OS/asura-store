@@ -45,6 +45,11 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v5
 
+      - name: Trust the checkout (the container runs as a different user)
+        # Without this git reports "dubious ownership" and go build fails to
+        # stamp version control information into the binary.
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - name: Object to the toolchain
         run: go version
 
@@ -148,6 +153,11 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v5
 
+      - name: Trust the checkout (the container runs as a different user)
+        # Without this git reports "dubious ownership" and go build fails to
+        # stamp version control information into the binary.
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - name: The window's JavaScript helpers pass their tests
         run: node --test ui/lib/store.test.mjs
 
@@ -169,6 +179,11 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v5
 
+      - name: Trust the checkout (the container runs as a different user)
+        # Without this git reports "dubious ownership" and go build fails to
+        # stamp version control information into the binary.
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - name: qmllint every window file (the Quickshell imports warn; errors fail)
         run: |
           find ui -name '*.qml' -print
@@ -187,6 +202,11 @@ jobs:
 
       - name: Check out repository
         uses: actions/checkout@v5
+
+      - name: Trust the checkout (the container runs as a different user)
+        # Without this git reports "dubious ownership" and go build fails to
+        # stamp version control information into the binary.
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: The catalogue JSON is well-formed and matches the provider grammar
         run: |
