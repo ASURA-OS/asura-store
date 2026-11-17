@@ -47,7 +47,7 @@ unchanged, every page in the same shape.
 `catalog` has four categories. `apps` is a shelf of about thirty seed packages
 with summary, description, version and home page read from apt (`xbps-query` on
 a Void host), and the installed read from dpkg (`xbps-query -l`). `barstyles`
-lists the shell's three built-in bar styles — `qsbar`, `kairos`, `sumi` — and
+lists the shell's two built-in bar styles — `top` and `side` — and
 the one `shell.json` selects. `plugins`
 reads the local catalogue under `catalog/plugins/`: each entry carries an
 `upstream` repo, and installed means a folder in `~/.local/share/asura/plugins`.
@@ -207,7 +207,7 @@ CONSTRUCTION). Items honor the wider `Item` contract — tags, accent, surface,
 kind, licence, screenshots — when a downstream page wants them.
 
 `barstyles` manifests are on record only: the backend itself lists the shell's
-three built-in styles (`qsbar`, `kairos`, `sumi`), so a bar style entry is
+two built-in styles (`top` and `side`), so a bar style entry is
 metadata, not shelf content.
 
 The catalogue ships empty of fiction today: `plugins/` and `themes/` carry no
