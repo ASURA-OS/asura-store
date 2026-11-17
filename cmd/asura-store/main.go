@@ -25,6 +25,7 @@ import (
 	"io"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -163,7 +164,34 @@ func runInstall(provs []Provider, args []string) error {
 	}
 	ctx, stop := transactionContext()
 	defer stop()
+	if err := checkWindowManagerGate(ctx, p, args[0], args[1]); err != nil {
+		return err
+	}
 	return p.Install(ctx, args[1])
+}
+
+// checkWindowManagerGate refuses to install an item authored for another
+// window manager (docs/store.md, "The window-manager gate"). Native packages
+// never declare one, so apps skip the catalogue read it would cost.
+func checkWindowManagerGate(ctx context.Context, p Provider, category, id string) error {
+	if category == "apps" {
+		return nil
+	}
+	items, _, err := p.Load(ctx, false)
+	if err != nil {
+		// The install itself reports a provider that cannot be read.
+		return nil
+	}
+	for _, it := range items {
+		if it.ID != id {
+			continue
+		}
+		if ok, running := productWindowManagerGate(it.RequiredWindowManager); !ok {
+			return fmt.Errorf("%s is made for %s, and this session runs %s", it.Name, strings.TrimSpace(it.RequiredWindowManager), running)
+		}
+		return nil
+	}
+	return nil
 }
 
 func runRemove(provs []Provider, args []string) error {
