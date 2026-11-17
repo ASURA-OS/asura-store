@@ -54,14 +54,19 @@ func parseWindowManager(out string) string {
 // running one; running carries that manager's name for the reason line. An item
 // that declares nothing runs anywhere.
 func productWindowManagerGate(required string) (ok bool, running string) {
-	required = strings.TrimSpace(required)
-	if required == "" {
+	if strings.TrimSpace(required) == "" {
+		// Nothing to check: don't ask the session at all.
 		return true, ""
 	}
-	running = runningWindowManager()
-	if running == "" {
-		// Nothing to compare against: leave the item installable rather than
-		// hiding content on a machine whose provider cannot be read.
+	return windowManagerGate(required, runningWindowManager())
+}
+
+// windowManagerGate is the comparison itself, apart from asking the session,
+// so it can be tested. A machine whose provider cannot be read gates nothing:
+// leave the item installable rather than hide content on a guess.
+func windowManagerGate(required, running string) (ok bool, runningName string) {
+	required = strings.TrimSpace(required)
+	if required == "" || running == "" {
 		return true, ""
 	}
 	if strings.EqualFold(required, running) {

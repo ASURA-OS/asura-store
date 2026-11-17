@@ -80,13 +80,13 @@ window-manager gate, and how to author catalogue entries — is
 
 ## Development
 
-Prerequisites: Go (the toolchain `go.mod` pins, currently 1.26.8), Node.js 22+ for the
-window's JavaScript tests, `jq`, and an ASURA OS session to run the window in (note
-below). `qmllint` needs the Qt QML toolchain and the two modules the window imports:
+Prerequisites: Go (at least the version `go.mod` names), Node.js 22+ for the window's
+JavaScript tests, `jq`, and an ASURA OS session to run the window in (note below).
+`qmllint` comes with Qt's declarative tools. On ASURA OS (or any Void Linux system),
+all of it is one command:
 
 ```bash
-sudo apt-get install qt6-declarative-dev-tools qt6-declarative-dev \
-  qml6-module-qtquick qml6-module-qtquick-effects
+sudo xbps-install -S go gcc make jq nodejs qt6-declarative-devel qt6-declarative-tools
 ```
 
 Every day:
