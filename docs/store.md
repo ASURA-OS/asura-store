@@ -45,9 +45,9 @@ field names — `Catalog`, `Category`, `Item` — and the window reads them
 unchanged, every page in the same shape.
 
 `catalog` has four categories. `apps` is a shelf of about thirty seed packages
-with summary, description, version and home page read from apt (`xbps-query` on
-a Void host), and the installed read from dpkg (`xbps-query -l`). `barstyles`
-lists the shell's three built-in bar styles — `qsbar`, `kairos`, `sumi` — and
+with summary, description, version and home page read from `xbps-query -S`,
+and the installed read from `xbps-query -l`. `barstyles`
+lists the shell's two built-in bar styles — `top` and `side` — and
 the one `shell.json` selects. `plugins`
 reads the local catalogue under `catalog/plugins/`: each entry carries an
 `upstream` repo, and installed means a folder in `~/.local/share/asura/plugins`.
@@ -66,35 +66,22 @@ The window runs `asura-store install CATEGORY ID`. The store prints one
 `{"stage","percent"}` JSON line per step on stdout — a negative percent means
 the step has no number — and one sentence on stderr, which the window shows.
 
-`apps` is native packages, and its privilege path is the host's:
+`apps` is native packages from Void Linux's repositories:
 
-1. On an Ubuntu host the `asura-pkg-add` helper exists. `asura-store` runs
-   `asura-pkg-add --status vlc`, and before any prompt the helper simulates the
-   change with `apt-get -s` and refuses two things: a change that would also
-   remove other packages, and a package that only installs a snap (Ubuntu's
-   `firefox`, `chromium-browser` and `thunderbird` are snap launchers, and ASURA
-   does not use snap). The refusal is a sentence on stderr.
-2. The helper re-runs itself through `pkexec`. polkit asks the session's
+1. `asura-store` runs `pkexec xbps-install -y vlc` (or `pkexec xbps-remove -y vlc`)
+   directly; there is no helper in between. polkit asks the session's
    authentication agent, which is `asura-shell`, for the password. Nothing in
    the store runs `sudo`.
-3. As root the helper runs `apt-get install` with apt's machine status on
-   stdout, and `asura-store` turns it into one `{"stage":"DOWNLOADING","percent":42}`
-   line per step. The stages are `AUTHORIZING`, `DOWNLOADING`, then `INSTALLING`
-   (or `REMOVING`).
+2. The store brackets the transaction with `AUTHORIZING`, then `INSTALLING`
+   (or `REMOVING`) at 100, since xbps cannot number one transaction.
+3. A declined prompt, or no agent to ask, ends `pkexec` with 126 or 127, and the
+   store reports that authorization was declined. Any other failure is reported
+   with xbps's own message.
 
-On a Void host there is no helper: `pkexec xbps-install -y` (or
-`xbps-remove -y`) runs directly, and the store brackets it with `AUTHORIZING`
-and `INSTALLING` (or `REMOVING`), since xbps cannot number one transaction. A
-declined prompt, or no agent to ask, ends `pkexec` with 126 or 127, and the
-store reports the same declined-authorization sentence as the helper path.
-
-Cancel is honoured until dpkg starts. The caller cannot signal a root process,
-so `asura-store` writes `cancel` to the helper's stdin, which stops apt-get
-only while it is downloading and only if no dpkg is running. After that the
-transaction finishes, because stopping apt-get under dpkg leaves a
-half-configured system. `asura-store` also ignores `SIGPIPE` and `SIGHUP`, so
-closing the window never kills a transaction partway — only SIGTERM and SIGINT
-(the window's cancel) do.
+The window cancels with SIGTERM or SIGINT. Once `pkexec` has started xbps as
+root, the store cannot signal it, so a transaction that has started runs to its
+end rather than leave a half-configured system. `asura-store` also ignores
+`SIGPIPE` and `SIGHUP`, so closing the window never kills a transaction partway.
 
 `plugins` installs nothing itself. The catalogue entry names the upstream repo,
 and the store runs `asura plugin install <upstream> --yes` (remove runs
@@ -147,12 +134,10 @@ runs anywhere, and a machine whose provider cannot be read gates nothing.
 
 ## Search
 
-`search` works on whichever archive exists. On an apt host it reads
-`apt-cache search`, keeps the hits where every word is in the name or the
-one-line summary, leaves out libraries, headers and debug packages, and ranks
-an exact name first, then a prefix, then a substring, ties by shorter name. On
-a Void host it reads `xbps-query -Rs` and applies the same ranking, folding in
-what is installed. The query gets 20 seconds; the window runs it after a typed
+`search` reads `xbps-query -Rs`, keeps the hits where every word is in the
+name or the one-line summary, leaves out libraries, headers and debug packages,
+and ranks an exact name first, then a prefix, then a substring, ties by shorter
+name, folding in what is installed. The query gets 20 seconds; the window runs it after a typed
 query pauses and shows the hits with the shelf. An archive that answers nothing
 answers `{"items": []}`, not an error.
 
@@ -201,13 +186,13 @@ enforced at load:
 | `themes`, `barstyles` | `^[a-z0-9][a-z0-9._-]*$` |
 
 Optional gates on any entry: `requiredWindowManager` (the gate above),
-`requiredPackageManagers` (e.g. `["apt"]`), `downloadPaused` with
+`requiredPackageManagers` (e.g. `["xbps"]`), `downloadPaused` with
 `downloadPauseReason` (the item stays listed and removable, marked UNDER
 CONSTRUCTION). Items honor the wider `Item` contract — tags, accent, surface,
 kind, licence, screenshots — when a downstream page wants them.
 
 `barstyles` manifests are on record only: the backend itself lists the shell's
-three built-in styles (`qsbar`, `kairos`, `sumi`), so a bar style entry is
+two built-in styles (`top` and `side`), so a bar style entry is
 metadata, not shelf content.
 
 The catalogue ships empty of fiction today: `plugins/` and `themes/` carry no
