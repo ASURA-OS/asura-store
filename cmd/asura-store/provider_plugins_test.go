@@ -41,6 +41,7 @@ func TestPluginProviderInstalled(t *testing.T) {
 	tmp := t.TempDir()
 	t.Setenv("XDG_DATA_HOME", tmp)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(tmp, "config"))
+	t.Setenv("ASURA_CATALOG_DIR", filepath.Join(tmp, "catalog"))
 
 	p := pluginProvider{}
 	items, _, err := p.Load(context.Background(), false)
@@ -72,6 +73,7 @@ func TestThemeProviderInstalledAndActive(t *testing.T) {
 	t.Setenv("XDG_DATA_HOME", tmp)
 	cfg := filepath.Join(tmp, "config")
 	t.Setenv("XDG_CONFIG_HOME", cfg)
+	t.Setenv("ASURA_CATALOG_DIR", filepath.Join(tmp, "catalog"))
 
 	if err := os.MkdirAll(filepath.Join(tmp, "asura", "themes", "obsidian"), 0o755); err != nil {
 		t.Fatal(err)

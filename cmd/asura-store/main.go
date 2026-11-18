@@ -45,6 +45,18 @@ func dispatch(args []string) error {
 		return fmt.Errorf("no command; expected catalog, search, check, install, remove, open, or settings")
 	}
 	switch args[0] {
+	case "-h", "--help", "help":
+		fmt.Print(`Usage: asura-store <command> [args]
+
+  catalog            the catalog as JSON
+  search QUERY       search the catalog and the package sources
+  check              which providers (xbps, flatpak) are available
+  install ID         install an app
+  remove ID          remove an app
+  open               open the Store window
+  settings           open the Store's settings
+`)
+		return nil
 	case "catalog":
 		return runCatalog(os.Stdout, providers(), args[1:])
 	case "search":

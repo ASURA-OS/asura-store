@@ -1,0 +1,19 @@
+{
+  "id": "sysmon-glance",
+  "name": "Sysmon Glance",
+  "category": "plugins",
+  "summary": "Compact CPU, memory, and thermal telemetry HUD for the bar and desktop",
+  "description": "Native status monitoring plugin that connects with asura-sysmon to display real-time processor load, RAM allocation, GPU telemetry, and thermal gauges.",
+  "author": "ASURA OS Core Team <core@asura-os.org>",
+  "version": "1.0.0",
+  "license": "GPL-3.0",
+  "kind": "bar",
+  "verificationStatus": "verified",
+  "tags": ["monitoring", "telemetry", "sysmon", "hardware", "asura-native"],
+  "upstream": "https://github.com/ASURA-OS/plugin-sysmon-glance",
+  "metadata": {
+    "hosts": ["topbarGlyph", "desktopWidget"],
+    "verified": true,
+    "provider": "ASURA Core"
+  }
+}

@@ -13,6 +13,13 @@ import (
 // CWD-relative "catalog/<kind>" alone misses all of them, which is why the
 // plugins shelf fell back to hard-coded data under test.
 func catalogDirFor(kind string) string {
+	if override := os.Getenv("ASURA_CATALOG_DIR"); override != "" {
+		p := filepath.Join(override, kind)
+		if fi, err := os.Stat(p); err == nil && fi.IsDir() {
+			return p
+		}
+		return ""
+	}
 	candidates := []string{
 		filepath.Join("/usr/share/asura/store/catalog", kind),
 	}

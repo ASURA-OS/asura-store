@@ -1,0 +1,16 @@
+{
+  "id": "asura-cyber",
+  "name": "Asura Cyber",
+  "category": "themes",
+  "summary": "High-contrast cyberpunk palette with vivid neon red and cyan accents",
+  "description": "Cyberpunk terminal aesthetics tailored for high-contrast Wayland compositors with dark zinc base, glowing cyan borders, and bold neon typography.",
+  "author": "ASURA OS Core Team <core@asura-os.org>",
+  "version": "1.0.0",
+  "license": "GPL-3.0",
+  "tags": ["cyberpunk", "high-contrast", "neon", "official"],
+  "upstream": "https://github.com/ASURA-OS/theme-asura-cyber",
+  "metadata": {
+    "provider": "Official",
+    "verified": true
+  }
+}

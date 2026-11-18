@@ -1,0 +1,19 @@
+{
+  "id": "media-hud",
+  "name": "Media HUD",
+  "category": "plugins",
+  "summary": "Wayland now-playing media controller with MPRIS2 playerctl integration",
+  "description": "High-contrast now-playing bar glyph and popout panel with media metadata, playback toggles (play/pause, next, previous), and volume integration.",
+  "author": "ASURA OS Core Team <core@asura-os.org>",
+  "version": "1.0.0",
+  "license": "GPL-3.0",
+  "kind": "bar",
+  "verificationStatus": "verified",
+  "tags": ["media", "audio", "mpris2", "playerctl", "asura-native"],
+  "upstream": "https://github.com/ASURA-OS/plugin-media-hud",
+  "metadata": {
+    "hosts": ["topbarGlyph", "desktopWidget"],
+    "verified": true,
+    "provider": "ASURA Core"
+  }
+}
