@@ -160,14 +160,14 @@ func (xbpsProvider) Install(ctx context.Context, id string) error {
 	if !xbpsPkgName.MatchString(id) {
 		return fmt.Errorf("invalid package name %q", id)
 	}
-	return runXbpsTransaction(ctx, "INSTALLING", id, []string{"xbps-install", "-y", id}, "install")
+	return runXbpsTransaction(ctx, "INSTALLING", []string{"xbps-install", "-y", id}, "install")
 }
 
 func (xbpsProvider) Remove(ctx context.Context, id string) error {
 	if !xbpsPkgName.MatchString(id) {
 		return fmt.Errorf("invalid package name %q", id)
 	}
-	return runXbpsTransaction(ctx, "REMOVING", id, []string{"xbps-remove", "-y", id}, "remove")
+	return runXbpsTransaction(ctx, "REMOVING", []string{"xbps-remove", "-y", id}, "remove")
 }
 
 // runXbpsTransaction honours the store's progress contract -- one
@@ -175,7 +175,7 @@ func (xbpsProvider) Remove(ctx context.Context, id string) error {
 // the window reports. pkexec runs xbps directly and the store brackets the
 // transaction with AUTHORIZING/INSTALLING lines.
 // A declined prompt ends pkexec with 126 or 127.
-func runXbpsTransaction(ctx context.Context, working, id string, xbpsArgs []string, verb string) error {
+func runXbpsTransaction(ctx context.Context, working string, xbpsArgs []string, verb string) error {
 	emitStage("AUTHORIZING", -1)
 
 	cmd := exec.CommandContext(ctx, "pkexec", append([]string{xbpsArgs[0]}, xbpsArgs[1:]...)...)
