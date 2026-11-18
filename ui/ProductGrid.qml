@@ -19,12 +19,12 @@ FocusScope {
 
     activeFocusOnTab: true
 
-    // a target tile width near 340px keeps cards large enough to read art yet
-    // yields more columns on a wide panel; at least two so a tile is never full
-    // width.
-    readonly property int columns: Math.max(2, Math.round(view.width / 340))
+    // a target tile width near 260px fits four across the store's window and
+    // more on a wide one, with tiles still large enough for an icon and a
+    // title; at least two so a tile is never full width.
+    readonly property int columns: Math.max(2, Math.round(view.width / 260))
     readonly property real cellW: view.width / grid.columns
-    readonly property real cellH: Math.round(grid.cellW * 0.66)
+    readonly property real cellH: Math.round(grid.cellW * 0.72)
     property alias contentY: view.contentY
     property bool restoring: false
 

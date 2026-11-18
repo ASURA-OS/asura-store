@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell
 import qs.Ui.Singletons
 import "lib/store.js" as StoreLogic
 
@@ -20,6 +21,19 @@ Item {
         return raw.length > 0 ? raw : String(item && item.art || "");
     }
     readonly property bool hasArtwork: cover.coverArt !== ""
+    // An app with no catalogue art shows its own icon: the icon its desktop
+    // entry names, from the icon theme. Empty when there is none, and then the
+    // initials badge stands in.
+    readonly property string appIcon: {
+        if (cover.hasArtwork || !item || !item.id)
+            return "";
+        const entry = DesktopEntries.heuristicLookup(String(item.id));
+        const name = entry && entry.icon ? String(entry.icon) : "";
+        return name !== "" ? Quickshell.iconPath(name, true) : "";
+    }
+    readonly property real glyphSize: Math.min(cover.width, cover.height) * (cover.tile ? 0.34 : 0.4)
+    // On a tile the title sits along the bottom, so the glyph rides a little high.
+    readonly property real glyphLift: cover.tile ? cover.height * 0.08 : 0
     readonly property bool hasIdentity: Boolean(item && (item.id || item.name))
     readonly property string coverTitle: String(item && (item.name || item.id) || I18n.tr("Untitled"))
     readonly property color coverSurface: item && item.surface ? item.surface : Tokens.paperLift
@@ -48,39 +62,52 @@ Item {
             GradientStop {
                 position: 0
                 color: Qt.rgba(cover.coverAccent.r, cover.coverAccent.g,
-                               cover.coverAccent.b, 0.42)
+                               cover.coverAccent.b, 0.16)
             }
-            GradientStop { position: 0.54; color: cover.coverSurface }
+            GradientStop { position: 0.6; color: cover.coverSurface }
             GradientStop {
                 position: 1
-                color: Qt.darker(cover.coverSurface, 1.7)
+                color: Qt.darker(cover.coverSurface, 1.25)
             }
         }
     }
 
-    Rectangle {
-        width: parent.width * 0.82
-        height: width
+    // The app's own icon.
+    Image {
+        objectName: "asura-store-cover-icon"
+        visible: cover.appIcon !== ""
+        source: cover.appIcon
+        width: cover.glyphSize
+        height: cover.glyphSize
+        sourceSize.width: width * 2
+        sourceSize.height: height * 2
+        fillMode: Image.PreserveAspectFit
+        asynchronous: true
+        smooth: true
         anchors.centerIn: parent
-        visible: !cover.hasArtwork && cover.hasIdentity
-        rotation: -18
-        radius: width / 2
-        color: "transparent"
-        border.width: Math.max(1, Tokens.border)
-        border.color: Qt.rgba(cover.coverAccent.r, cover.coverAccent.g,
-                              cover.coverAccent.b, 0.45)
+        anchors.verticalCenterOffset: -cover.glyphLift
     }
 
-    Text {
+    // No art and no icon: a quiet initials badge in the product's accent.
+    Rectangle {
+        visible: !cover.hasArtwork && cover.appIcon === "" && cover.hasIdentity
+        width: cover.glyphSize
+        height: cover.glyphSize
         anchors.centerIn: parent
-        visible: !cover.hasArtwork && cover.hasIdentity
-        text: cover.coverTitle.slice(0, 2).toUpperCase()
-        color: Qt.rgba(cover.coverAccent.r, cover.coverAccent.g,
-                       cover.coverAccent.b, 0.78)
-        font.family: Tokens.display
-        font.pixelSize: Math.max(Tokens.fHero, Math.min(parent.width, parent.height) * 0.28)
-        font.weight: Font.Black
-        font.letterSpacing: -2
+        anchors.verticalCenterOffset: -cover.glyphLift
+        radius: width * 0.24
+        color: Qt.rgba(cover.coverAccent.r, cover.coverAccent.g, cover.coverAccent.b, 0.18)
+        border.width: Tokens.border
+        border.color: Qt.rgba(cover.coverAccent.r, cover.coverAccent.g, cover.coverAccent.b, 0.35)
+
+        Text {
+            anchors.centerIn: parent
+            text: String(cover.item && cover.item.initials || cover.coverTitle.slice(0, 2)).toUpperCase()
+            color: Qt.lighter(cover.coverAccent, 1.6)
+            font.family: Tokens.display
+            font.pixelSize: parent.width * 0.38
+            font.weight: Font.DemiBold
+        }
     }
 
     ProductMedia {
