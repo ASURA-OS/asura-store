@@ -9,10 +9,8 @@ rules here are short, and most of them are what the CI gate
 
 - This work is **GPL-3.0** ([`LICENSE`](LICENSE)). Every contribution is under
   GPL-3.0; never paste third-party code into the tree.
-- The store is a derivative of **Ryoku**'s RyoStore (GPL-3.0) — see
-  [`NOTICE.md`](NOTICE.md). Files keep any copyright/SPDX/ported-from lines
-  they carry. If you port something new from Ryoku, extend the ledger there
-  rather than silently growing the derivative.
+- See [`NOTICE.md`](NOTICE.md) for licensing attribution and third-party notices.
+  Files keep any copyright/SPDX/license lines they carry.
 - Every commit carries a `Signed-off-by:` line (`git commit -s`), so the
   Developer Certificate of Origin says the patch is yours or yours to pass on.
 
@@ -61,7 +59,7 @@ refusals, which must each be one sentence on stderr and exit 1.
   one JSON document per invocation; install/remove print `{"stage","percent"}`
   lines. Anything chatty goes to stderr, and an error is one sentence a
   window could show a person.
-- **The `Item` contract is shared with Ryoku's window pages.** Field names and
+- **The `Item` contract is shared with the window pages.** Field names and
   JSON tags are the compatibility surface — add fields if you must, never
   rename or repurpose one. `cmd/asura-store/model.go` is the source of truth;
   keep its comments honest.

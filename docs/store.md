@@ -2,15 +2,14 @@
 
 This repository is the standalone home of ASURA's software store: the Quickshell
 window (`ui/`), the `asura-store` command (`cmd/asura-store/`) and the local
-catalogue (`catalog/`). It is a port of Ryoku's RyoStore — the pieces and the
-ledger live in [NOTICE](NOTICE.md). In the distribution itself the trees are
+catalogue (`catalog/`). The pieces and the ledger live in [NOTICE](../NOTICE.md). In the distribution itself the trees are
 byte-identical mirrors of this one (`desktop/cmd/asura-store/`,
 `shell/store.qml` + `shell/store/`, `desktop/catalog/`); this copy is canonical.
 
 | Piece | Where | What it does |
 |---|---|---|
 | `asura-store` | `cmd/asura-store` | The data plane: catalogue, search, check, install, remove, open, settings. |
-| The window | `ui/store.qml` and the components beside it (`ui/*.qml`, `ui/Singletons/`, `ui/lib/store.js`) | RyoStore's window, ported as it was; the logic sits beside its `node --test` suite. |
+| The window | `ui/store.qml` and the components beside it (`ui/*.qml`, `ui/Singletons/`, `ui/lib/store.js`) | The store window; the logic sits beside its `node --test` suite. |
 | `catalog/` | `catalog/<kind>/*.json` | Local catalogue manifests, staged by `make install` to `/usr/share/asura/store/catalog/`. A checkout update changes the shelf without a rebuild. |
 
 On disk the installed layout is `/usr/bin/asura-store` plus
@@ -124,7 +123,7 @@ its `offline`, `cachedAt` and `error` — while the others still render.
 ## The window-manager gate
 
 A catalogue item may name the window manager it was authored against
-(`requiredWindowManager`; Ryoku's manifest carried the same idea). The store
+(`requiredWindowManager`). The store
 asks the running provider once per launch — `asura wm status`, whose
 `Provider:` line is the answer — and compares names; a third provider needs no
 change in the store. An item named for another manager stays listed and keeps
@@ -203,8 +202,7 @@ them up on the next build.
 
 ## What is not here, and why
 
-- **No remote registry.** Ryoku's registry, extras actuator and receipt
-  transactions stay behind. ASURA's catalogues are the local JSON files in
+- **No remote registry.** ASURA's catalogues are the local JSON files in
   `catalog/`, the package manager and the plugin folder, and the local files
   are also the cached content — there is no snapshot of a registry to
   reconcile.

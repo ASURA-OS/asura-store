@@ -8,7 +8,7 @@ manifests (`catalog/`). Reports about the code in this tree belong here.
 
 Out of scope: the distribution itself
 ([`mohitjoer/ASURA-OS`](https://github.com/mohitjoer/ASURA-OS)), XBPS and polkit,
-Quickshell, the plugin kit (`asura plugin`), and Ryoku upstream. Anything at
+Quickshell, and the plugin kit (`asura plugin`). Anything at
 those seams is still welcome if the store's side caused or exposed it.
 
 ## The honest threat model

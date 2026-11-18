@@ -54,8 +54,8 @@ it — CI refuses the drift either way.
 ## Licensing and sign-off
 
 - [ ] Every commit carries a `Signed-off-by:` line (`git commit -s`)
-- [ ] The contribution is under GPL-3.0, per [`LICENSE`](LICENSE) and the
-      porting ledger in [`NOTICE.md`](NOTICE.md)
+- [ ] The contribution is under GPL-3.0, per [`LICENSE`](../LICENSE) and the
+      porting ledger in [`NOTICE.md`](../NOTICE.md)
 - [ ] No third-party code was pasted into the tree
 
 ## Notes for the reviewer

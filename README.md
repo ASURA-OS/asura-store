@@ -10,10 +10,7 @@
 
 The software store of the **[ASURA OS](https://github.com/mohitjoer/ASURA-OS)** desktop:
 a Quickshell showroom window and a small Go data plane that browse, search, install and
-remove software. It is a port of Ryoku's **RyoStore** — the window and the backend come
-from [`apps/ryostore`](https://github.com/ryoku-dev/ryoku) in the Ryoku tree, rebranded
-and rewired for ASURA. [NOTICE.md](NOTICE.md) is the honest ledger of what came across
-and what did not.
+remove software. [NOTICE.md](NOTICE.md) contains licensing and third-party notices.
 
 | Shelf | What it offers | Where it comes from |
 |---|---|---|
@@ -118,6 +115,5 @@ and the licence.
 
 ## Licence and origin
 
-Everything in this repository is **GPL-3.0** ([LICENSE](LICENSE)). The project is a
-derivative of Ryoku's RyoStore (GPL-3.0), so its name and link stay in
-[NOTICE.md](NOTICE.md) for as long as the code does.
+Everything in this repository is **GPL-3.0** ([LICENSE](LICENSE)). See
+[NOTICE.md](NOTICE.md) for licensing details.
