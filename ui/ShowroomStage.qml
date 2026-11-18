@@ -271,6 +271,8 @@ Item {
             Btn {
                 objectName: "asura-store-stage-primary"
                 text: I18n.tr(stage.primaryLabel)
+                // Installed is the status line above; no greyed-out button for it.
+                visible: !stage.hasActionItem || StoreLogic.primaryAction(stage.actionItem) !== "INSTALLED"
                 primary: true
                 armed: stage.hasActionItem
                         && StoreLogic.primaryAction(stage.actionItem) !== "INSTALLED"

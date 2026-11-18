@@ -99,18 +99,26 @@ FocusScope {
     readonly property var allNames: components.map(c => String(c.name))
     onItemChanged: { rebuildSelection(); galleryIndex = 0; }
     readonly property real targetX: Tokens.s6
-    readonly property real targetY: Tokens.s6
+    // A compact cover sits centred beside the text; a page-tall one starts at the top.
+    readonly property real targetY: hasOwnArt ? Tokens.s6 : Math.round((height - targetWidth) / 2)
     // An art-only product's dossier carries only text, so the hero can take more
     // of the page; a product with a gallery keeps the hero narrower so the dossier
     // stays wide enough for the preview beside it.
-    readonly property real targetWidth: hasBodyContent
+    // A product with no art of its own (an app: its icon, or an initials
+    // badge) gets a compact square cover; a page-tall plate around a small
+    // icon was mostly empty space.
+    readonly property bool hasOwnArt: String(actionItem && (actionItem.artRaw || actionItem.art) || "") !== ""
+    readonly property real targetWidth: !hasOwnArt
+            ? Math.round(Math.min(300, width * 0.28))
+            : hasBodyContent
             ? Math.min(430, width * 0.42)
             : Math.round(Math.min(width * 0.5, 600))
     // The body carries a gallery (real screenshots) or a bundle's component list.
     // An art-only product has neither, so its dossier centres instead of pinning
     // a foot below a void.
     readonly property bool hasBodyContent: isBundle || screenshotCount > 0
-    readonly property real targetHeight: Math.max(1, height - Tokens.s6 * 2)
+    readonly property real fullHeight: Math.max(1, height - Tokens.s6 * 2)
+    readonly property real targetHeight: hasOwnArt ? fullHeight : targetWidth
     readonly property rect effectiveOrigin: originRect.width > 0 && originRect.height > 0
             ? originRect
             : Qt.rect(targetX, targetY, targetWidth, targetHeight)
@@ -282,9 +290,9 @@ FocusScope {
         id: dossier
         objectName: "asura-store-detail-dossier"
         x: detail.targetX + detail.targetWidth + Tokens.s6
-        y: detail.targetY
+        y: Tokens.s6
         width: Math.max(1, detail.width - x - Tokens.s6)
-        height: detail.targetHeight
+        height: detail.fullHeight
         opacity: detail.transitionProgress
         clip: true
 
@@ -698,7 +706,9 @@ FocusScope {
 
                 Btn {
                     objectName: "asura-store-detail-install"
-                    visible: !detail.isBundle
+                    // Installed reads once, in the status line above; a greyed-out
+                    // INSTALLED button beside it said the same thing again.
+                    visible: !detail.isBundle && StoreLogic.primaryAction(detail.actionItem) !== "INSTALLED"
                     text: detail.busyKey === detail.actionKey && detail.installStage !== ""
                             ? I18n.tr(detail.installStage)
                             : (StoreLogic.competingActionLabel(detail.busyKey, detail.actionKey, detail.installStage) !== ""
